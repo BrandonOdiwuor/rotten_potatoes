@@ -7,14 +7,25 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all    
+    @all_ratings = MoviesController.ratings    
+    @movies = Movie.all
     if params[:sort_by_title] then      
       @movies.sort! {|a,b| a.title <=> b.title}
     elsif params[:sort_by_date] then      
       @movies.sort! {|a,b| a.release_date <=> b.release_date}
+    elsif params[:ratings] then
+      @movies = MoviesController.filter_by_ratings(params[:ratings])
     else
-      @movies
+      @movies = Movie.all
     end
+  end
+
+  def self.filter_by_ratings(rate)    
+    result = Array.new 
+    rate.each_key do |key|
+      result.push(key)
+    end
+    return Movie.where({rating:result})
   end
 
   def new
@@ -45,4 +56,7 @@ class MoviesController < ApplicationController
     redirect_to movies_path
   end
 
+  def self.ratings
+    return Movie.uniq.pluck(:rating)
+  end
 end
